@@ -58,6 +58,32 @@ shinyUI(
                             mainPanel(
                                 plotOutput("missingData"))
                             )
-                         )
-                     )
+                        ),
+
+               tabPanel("Unique values",
+                        sidebarLayout(
+                            sidebarPanel(
+                                selectizeInput('institution_code_unique', 'Institution Code',
+                                               choices = unique(hol$institutioncode),
+                                               multiple = TRUE,
+                                               selected = unique(hol$institutioncode)),
+                                 checkboxInput("fully_unique",
+                                              "Remove fields with only unique values",
+                                               FALSE),
+                                checkboxInput("only_one",
+                                              "Remove fields with only 1 value",
+                                              FALSE),
+                                selectizeInput('fields_to_show_unique', 'Fields to show',
+                                               choices = names(hol),
+                                               multiple = TRUE,
+                                               selected = names(hol))
+
+                                ),
+                            mainPanel(
+                                plotOutput("unique_values")
+                                #verbatimTextOutput("unique_text_values")
+                                )
+                            )
+                        )
+               )
     )

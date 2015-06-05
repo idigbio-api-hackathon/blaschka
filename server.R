@@ -92,4 +92,42 @@ shinyServer(
             print(p)
 
         })
+
+        output$unique_values <- renderPlot({
+            idig_data <- hol
+
+            idig_data_tmp <- idig_data %>%
+              filter(institutioncode %in% input$institution_code_unique)
+
+            n_row <- nrow(idig_data_tmp)
+
+            idig_data_tmp <- idig_data_tmp  %>%
+              #select(one_of(input$fields_to_show_unique)) %>%
+              summarise_each(funs(length(unique(na.omit(.))))) %>%
+              gather(field) %>%
+              as.data.frame %>%
+              setNames(c("field", "unique_values")) %>%
+              filter(unique_values != 0)
+
+            idig_data_tmp$field <- reorder(idig_data_tmp$field,
+                                           idig_data_tmp$unique_values,
+                                           sum)
+
+            total_unique <- idig_data_tmp %>% group_by(field) %>%
+              summarise(total_unique = sum(unique_values))
+
+            idig_data_tmp %<>% left_join(total_unique)
+
+            if (input$fully_unique)
+                idig_data_tmp %<>% filter(total_unique != n_row)
+
+            if (input$only_one)
+                idig_data_tmp %<>% filter(total_unique != 1)
+
+            p <- ggplot(idig_data_tmp, aes(x = field, y = unique_values)) +
+              geom_bar(stat = "identity") + coord_flip() + xlab("Data field") + ylab("Number of unique values")
+
+            print(p)
+
+        })
 })
