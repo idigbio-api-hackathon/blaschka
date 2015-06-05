@@ -18,10 +18,13 @@ shinyServer(
 
         output$queryText <- renderText({
             qry <- parseQueryString(session$clientData$url_search)
-            qry <- jsonlite::fromJSON(qry$rq)
-            message("Query: ", qry)
-            hol <<- idig_search_records(rq = qry, fields = "all")
-            if (nrow(hol) > 1) paste("Number of records:", nrow(hol)) else "problem"
+            if (length(qry)) {
+                qry <- jsonlite::fromJSON(qry$rq)
+                idig_time <- system.time(hol <<- idig_search_records(rq = qry, fields = "all"))
+                if (nrow(hol) > 1) paste("Time taken:", idig_time[1], "\nNumber of records:", nrow(hol)) else "problem"
+            } else {
+                "You need to specify a query"
+            }
         })
 
         output$distPlot <- renderPlot({
