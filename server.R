@@ -2,6 +2,7 @@ library(shiny)
 library(ggplot2)
 library(dplyr)
 library(magrittr)
+library(tidyr)
 
 # Define server logic required to draw a histogram
 shinyServer(
