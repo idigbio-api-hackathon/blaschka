@@ -3,16 +3,26 @@ library(ggplot2)
 library(dplyr)
 library(magrittr)
 library(tidyr)
+library(ridigbio)
+library(jsonlite)
 
 # Define server logic required to draw a histogram
 shinyServer(
-    function(input, output) {
+    function(input, output, session) {
         ## # Expression that generates a histogram. The expression is
         ## # wrapped in a call to renderPlot to indicate that:
         ## #
         ## #  1) It is "reactive" and therefore should
         ## #     re-execute automatically when inputs change
         ## #  2) Its output type is a plot
+
+        output$queryText <- renderText({
+            qry <- parseQueryString(session$clientData$url_search)
+            qry <- jsonlite::fromJSON(qry$rq)
+            message("Query: ", qry)
+            hol <<- idig_search_records(rq = qry, fields = "all")
+            if (nrow(hol) > 1) paste("Number of records:", nrow(hol)) else "problem"
+        })
 
         output$distPlot <- renderPlot({
 
@@ -30,7 +40,8 @@ shinyServer(
                     p <- p + geom_histogram()
                 }
             } else {
-                 p <- ggplot(idig_data, aes_string(x = "datecollected"))
+                p <- ggplot(idig_data, aes_string(x = "datecollected")) +
+                  xlab("Date of collection") + ylab("Proportion of specimens")
                 if (input$color_by != "none") {
                     p <- p + stat_ecdf(aes_string(colour = input$color_by))
                 } else {
@@ -70,7 +81,8 @@ shinyServer(
                 idig_data_tmp %<>% filter(total_missing != 0)
 
             p <- ggplot(idig_data_tmp, aes(x = field, y = percent_missing, fill = institution_code)) +
-              geom_bar(stat = "identity") + coord_flip()
+              geom_bar(stat = "identity") + coord_flip() + ylim(c(0, 1)) +
+              xlab("Data Fields") + ylab("Percent missing data")
 
             print(p)
 

@@ -3,38 +3,40 @@ library(shiny)
 # Define UI for application that draws a histogram
 shinyUI(
     navbarPage("iDigBio data exploration",
+               tabPanel("Loading the data",
+                        h3("Query"),
+                        verbatimTextOutput("queryText")
+                        ),
 
-    tabPanel("Plot through time",
-             sidebarLayout(
-                 ##titlePanel("yo mama"),
-                 sidebarPanel(
+               tabPanel("Plot through time",
+                        sidebarLayout(
+                            sidebarPanel(
+                                selectInput("plot_type",
+                                            label = "Plot type",
+                                            choices = c("Barplot", "Cumulative")),
 
-                     selectInput("plot_type",
-                                 label = "Plot type",
-                                 choices = c("Barplot", "Cumulative")),
+                                dateRangeInput("date_range",
+                                               label = "Date Range",
+                                               start = min(as.Date(hol$datecollected), na.rm = TRUE),
+                                               end = max(as.Date(hol$datecollected), na.rm = TRUE)),
 
-                     dateRangeInput("date_range",
-                                    label = "Date Range",
-                                    start = min(as.Date(hol$datecollected), na.rm = TRUE),
-                                    end = max(as.Date(hol$datecollected), na.rm = TRUE)),
+                                selectInput("color_by",
+                                            label = "Color by:",
+                                            choices = c("none", "institutioncode")),
 
-                     selectInput("color_by",
-                                 label = "Color by:",
-                                 choices = c("none", "institutioncode")),
+                                selectizeInput('institution_code', 'Institution Code',
+                                               choices = unique(hol$institutioncode),
+                                               multiple = TRUE,
+                                               selected = unique(hol$institutioncode))
 
-                     selectizeInput('institution_code', 'Institution Code',
-                                    choices = unique(hol$institutioncode),
-                                    multiple = TRUE,
-                                    selected = unique(hol$institutioncode))
+                                ),
 
-                     ),
-
-                     ## Show a plot of the generated distribution
-                 mainPanel(
-                     tabPanel("Samples through time", plotOutput("distPlot"))
-                     )
-                 )
-             ),
+                            ## Show a plot of the generated distribution
+                            mainPanel(
+                                tabPanel("Samples through time", plotOutput("distPlot"))
+                                )
+                            )
+                        ),
                tabPanel("Missing data",
                         sidebarLayout(
                             sidebarPanel(
