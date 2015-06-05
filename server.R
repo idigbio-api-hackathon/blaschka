@@ -59,10 +59,12 @@ shinyServer(
 
             idig_data <- hol
 
-            n_row <- nrow(idig_data)
-
             idig_data_tmp <- idig_data %>%
-              filter(institutioncode %in% input$institution_code_missing) %>%
+              filter(institutioncode %in% input$institution_code_missing)
+
+            n_row <- nrow(idig_data_tmp)
+
+            idig_data_tmp <-  idig_data_tmp %>%
               select(one_of(input$fields_to_show)) %>%
               group_by(institutioncode) %>%
               summarise_each(funs(sum(is.na(.)/n_row))) %>%
